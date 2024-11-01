@@ -19,7 +19,7 @@ typedef struct {
     bool winner;
 } Player;
 
-Player P, M;
+Player player, machine;
 
 int main (int argc, char **argv) {
     setlocale(LC_CTYPE, "en_US.UTF-8");
@@ -27,10 +27,13 @@ int main (int argc, char **argv) {
 
     tempfile = tmpfile();
 
-    printf("\e[91mError \e[0m\n");
+    if (tempfile == NULL) {
+        perror("\e[91mError with temp file\e[0m\n");
+        exit(1);
+    }
 
     if(signal(SIGCONT, signalHandler) == SIG_ERR) {
-        perror("Error defining the SIGCONT handler\n");
+        perror("\e[91mError defining the SIGCONT handler\e[0m\n");
         exit(1);
     }
 
@@ -38,18 +41,32 @@ int main (int argc, char **argv) {
         perror("Error defining the SIGUSR1 handler\n");
         exit(1);
     }
-
+ 
     if(signal(SIGUSR2, signalHandler) == SIG_ERR) {
         perror("Error defining the SIGUSR2 handler\n");
         exit(1);
     }
 
-    /*
-    if((P.pid = fork()) == -1) {
-        perror("")
+    
+    if((player.pid = fork()) == -1) {
+        perror("Error creating player process\n");
+        exit(1);
+    } else if (player.pid == 0){
+        while(true);
     }
 
-    */
+    if((machine.pid = fork()) == -1) {
+        perror("Error creating machine process\n");
+        exit(1);
+    } else if (machine.pid == 0) {
+        while(true);
+    }
+
+    
     fclose(tempfile);
 
+}
+
+static void signalHandler(int signal) {
+    printf("HOLA");
 }
