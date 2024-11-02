@@ -7,16 +7,17 @@
 #define WIDTH 80
 
 unsigned int board[HEIGHT][WIDTH];
-int blockPlayerX = WIDTH / 2;   // Posición inicial en el eje X
-int blockWidth = 8;        // Ancho del bloque
-int blockPlayerY = HEIGHT - 1; //Ubicacion en el eje Y
+int blockPlayerX = WIDTH / 2; // Initial position on the X-axis
+int blockWidth = 8; // Block width
+int blockPlayerY = HEIGHT - 1; // Position on the Y-axis
 
 int blockMachineX = WIDTH / 2;
 int blockMachineY = 1;
 
 void fillBoard();
 void drawBoard(int blockPlayerY);
-void moveBlock(char direction, int *blockPlayerY);
+void movePlayerBlock(char direction, int *blockPlayerY);
+void moveMachineBlock(char direction, int *blockMachineY);
 void configureTerminal();
 void resetTerminal();
 
@@ -32,7 +33,8 @@ int main() {
             system("clear");
             break;
         }
-        moveBlock(ch, &blockPlayerY); // Pasa la dirección y la dirección del bloque
+        movePlayerBlock(ch, &blockPlayerY); // Pasa la dirección y la dirección del bloque
+        moveMachineBlock(ch, &blockMachineY);
     }
 
     resetTerminal();
@@ -79,7 +81,7 @@ void drawBoard(int blockPlayerY) {
     printf("#\n");
 }
 
-void moveBlock(char direction, int *blockPlayerY) {
+void movePlayerBlock(char direction, int *blockPlayerY) {
     // Limpia la posición actual del bloque
     for (int j = *blockPlayerY; j < *blockPlayerY + blockWidth; j++) {
         if (j < WIDTH) {
@@ -102,6 +104,33 @@ void moveBlock(char direction, int *blockPlayerY) {
     for (int j = blockPlayerX; j < blockPlayerX + blockWidth; j++) {
         if (*blockPlayerY < HEIGHT && j < WIDTH) {
             board[*blockPlayerY][j] = 1; // Coloca el bloque
+        }
+    }
+}
+
+void moveMachineBlock(char direction, int *blockMachineY) {
+    // Limpia la posición actual del bloque
+    for (int j = *blockMachineY; j < *blockMachineY + blockWidth; j++) {
+        if (j < WIDTH) {
+            board[*blockMachineY][j] = 0; // Limpia el bloque
+        }
+    }
+
+    switch (direction) {
+        case 'a': // Izquierda
+            //if (blockPlayerX > 0) blockPlayerX--;
+            if (blockMachineX > 0) blockMachineX-=8;
+            break;
+        case 'd': // Derecha
+            //if (blockPlayerX + blockWidth < WIDTH) blockPlayerX++;
+            if (blockMachineX + blockWidth < WIDTH) blockMachineX +=8;
+            break;
+    }
+
+    // Coloca el bloque en la nueva posición
+    for (int j = blockMachineX; j < blockMachineX + blockWidth; j++) {
+        if (*blockMachineY < HEIGHT && j < WIDTH) {
+            board[*blockMachineY][j] = 1; // Coloca el bloque
         }
     }
 }

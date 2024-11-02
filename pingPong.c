@@ -8,14 +8,17 @@
 #include <sys/wait.h>
 #include <time.h>
 
+#define SIZE 10
 #ifndef D
 #define D 1
 #endif
 
-//Function declaration
+//Declaration of functions
 static void signalHandler(int signal);
+void drawBoard();
 
 //Global variables
+unsigned int board[SIZE][SIZE];
 pid_t father;
 FILE* tempfile;
 typedef struct {
@@ -295,5 +298,14 @@ static void signalHandler(int signal) {
                 exit(0);
             }
             break;
+    }
+}
+
+void drawBoard() {
+    for(int i = 0; i < SIZE; i++) {
+        for(int j = 0; j < SIZE; j++) {
+            printf("%hd", board[i][j]);
+        }
+        printf("\n");
     }
 }
