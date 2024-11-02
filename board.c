@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <termios.h>
+#include "board.h"
 
 #define HEIGHT 20
 #define WIDTH 80
@@ -14,14 +15,7 @@ int blockPlayerY = HEIGHT - 1; // Position on the Y-axis
 int blockMachineX = WIDTH / 2;
 int blockMachineY = 1;
 
-void fillBoard();
-void drawBoard(int blockPlayerY);
-void movePlayerBlock(char direction, int *blockPlayerY);
-void moveMachineBlock(char direction, int *blockMachineY);
-void configureTerminal();
-void resetTerminal();
-
-int main() {
+void initBoard() {
     configureTerminal();
 
     fillBoard();
@@ -29,22 +23,21 @@ int main() {
     while (1) {
         drawBoard(blockPlayerY);
         char ch = getchar();
-        if (ch == 'q') { // Presiona 'q' para salir
+        if (ch == 'q') { // Press 'q' to escape
             system("clear");
             break;
         }
-        movePlayerBlock(ch, &blockPlayerY); // Pasa la dirección y la dirección del bloque
+        movePlayerBlock(ch, &blockPlayerY);
         moveMachineBlock(ch, &blockMachineY);
     }
 
     resetTerminal();
-    return 0;
 }
 
 void fillBoard() {
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
-            board[i][j] = 0; // Llena el tablero con 0s
+            board[i][j] = 0; 
         }
     }
 }

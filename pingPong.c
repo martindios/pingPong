@@ -1,12 +1,13 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <locale.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <sys/wait.h>
 #include <time.h>
+#include "board.h"
 
 #define SIZE 10
 #ifndef D
@@ -15,7 +16,6 @@
 
 //Declaration of functions
 static void signalHandler(int signal);
-void drawBoard();
 
 //Global variables
 unsigned int board[SIZE][SIZE];
@@ -197,7 +197,7 @@ static void signalHandler(int signal) {
                     fwrite(&player, sizeof(Player), 1, tempfile);
                     fwrite(&machine, sizeof(Player), 1, tempfile);
                     rewind(tempfile);
-                    sleep(1);
+                    //sleep(1);
                     kill(father, SIGHUP);
                 } else { //Player return the ball
                     printf("Player return the ball");
@@ -301,11 +301,4 @@ static void signalHandler(int signal) {
     }
 }
 
-void drawBoard() {
-    for(int i = 0; i < SIZE; i++) {
-        for(int j = 0; j < SIZE; j++) {
-            printf("%hd", board[i][j]);
-        }
-        printf("\n");
-    }
-}
+
