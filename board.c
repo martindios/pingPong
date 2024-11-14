@@ -9,11 +9,13 @@
 
 unsigned int board[HEIGHT][WIDTH];
 int blockPlayerX = WIDTH / 2; // Initial position on the X-axis
-int blockWidth = 8; // Block width
 int blockPlayerY = HEIGHT - 1; // Position on the Y-axis
 
 int blockMachineX = WIDTH / 2;
 int blockMachineY = 1;
+
+int blockWidth = 8; // Block width
+
 
 void initBoard() {
     configureTerminal();
@@ -27,8 +29,8 @@ void initBoard() {
             system("clear");
             break;
         }
-        movePlayerBlock(ch, &blockPlayerY);
-        moveMachineBlock(ch, &blockMachineY);
+        movePlayerBlock(ch);
+        moveMachineBlock();
     }
 
     resetTerminal();
@@ -44,86 +46,77 @@ void fillBoard() {
 
 void drawBoard(int blockPlayerY) {
     system("clear");
-    // Dibuja la parte superior de la caja
+    // Draw the top border
     printf("#");
     for (int j = 0; j < WIDTH; j++) {
-        printf("#"); // Dibuja el borde superior
+        printf("#"); 
     }
     printf("#\n");
 
     for (int i = 0; i < HEIGHT; i++) {
-        printf("#"); // Dibuja el borde izquierdo
-        for (int j = 0; j < WIDTH; j++) {
-            // Imprime el bloque basado en su posición y dimensiones
+        printf("#"); // Draw the left border
+        for (int j = 0; j < WIDTH; j++) { 
             if (i == blockPlayerY && j >= blockPlayerX && j < blockPlayerX + blockWidth) {
-                printf("O"); // Imprime el bloque Player
+                printf("O"); //Draw the player block 
             } else if(i == blockMachineY && j >= blockMachineX && j < blockMachineX + blockWidth) {
-                printf("O");
+                printf("O"); //Draw the machine block
             } else {
-                printf(" "); // Espacio vacío
+                printf(" "); // Empty space
             }
         }
-        printf("#\n"); // Dibuja el borde derecho
+        printf("#\n"); // Draw the right border
     }
 
-    // Dibuja la parte inferior de la caja
+    // Draw the bottom border
     printf("#");
     for (int j = 0; j < WIDTH; j++) {
-        printf("#"); // Dibuja el borde inferior
+        printf("#");
     }
     printf("#\n");
 }
 
-void movePlayerBlock(char direction, int *blockPlayerY) {
-    // Limpia la posición actual del bloque
-    for (int j = *blockPlayerY; j < *blockPlayerY + blockWidth; j++) {
-        if (j < WIDTH) {
-            board[*blockPlayerY][j] = 0; // Limpia el bloque
+void movePlayerBlock(char direction) {
+    // Clear the current position of the player block
+    for (int j = blockPlayerX; j < blockPlayerX + blockWidth; j++) {
+        if (blockPlayerY < HEIGHT && j < WIDTH) {
+            board[blockPlayerY][j] = 0; // Clear the block
         }
     }
 
     switch (direction) {
-        case 'a': // Izquierda
-            //if (blockPlayerX > 0) blockPlayerX--;
+        case 'a': // Left
             if (blockPlayerX > 0) blockPlayerX-=8;
             break;
-        case 'd': // Derecha
-            //if (blockPlayerX + blockWidth < WIDTH) blockPlayerX++;
+        case 'd': // Right
             if (blockPlayerX + blockWidth < WIDTH) blockPlayerX +=8;
             break;
     }
 
-    // Coloca el bloque en la nueva posición
+    // Place the player block in the new position
     for (int j = blockPlayerX; j < blockPlayerX + blockWidth; j++) {
-        if (*blockPlayerY < HEIGHT && j < WIDTH) {
-            board[*blockPlayerY][j] = 1; // Coloca el bloque
+        if (blockPlayerY < HEIGHT && j < WIDTH) {
+            board[blockPlayerY][j] = 1; // Place the block
         }
     }
 }
 
-void moveMachineBlock(char direction, int *blockMachineY) {
-    // Limpia la posición actual del bloque
-    for (int j = *blockMachineY; j < *blockMachineY + blockWidth; j++) {
-        if (j < WIDTH) {
-            board[*blockMachineY][j] = 0; // Limpia el bloque
+void moveMachineBlock() {
+    // Clear the current position of the machine block
+    for (int j = blockMachineX; j < blockMachineX + blockWidth; j++) {
+        if (blockPlayerX < HEIGHT && j < WIDTH) {
+            board[blockMachineY][j] = 0; // Clear the block
         }
     }
 
-    switch (direction) {
-        case 'a': // Izquierda
-            //if (blockPlayerX > 0) blockPlayerX--;
-            if (blockMachineX > 0) blockMachineX-=8;
-            break;
-        case 'd': // Derecha
-            //if (blockPlayerX + blockWidth < WIDTH) blockPlayerX++;
-            if (blockMachineX + blockWidth < WIDTH) blockMachineX +=8;
-            break;
+    if (blockMachineX + blockWidth < WIDTH) {
+        blockMachineX += 8;
+    } else {
+        blockMachineX = 0;
     }
 
-    // Coloca el bloque en la nueva posición
     for (int j = blockMachineX; j < blockMachineX + blockWidth; j++) {
-        if (*blockMachineY < HEIGHT && j < WIDTH) {
-            board[*blockMachineY][j] = 1; // Coloca el bloque
+        if (blockMachineY < HEIGHT && j < WIDTH) {
+            board[blockMachineY][j] = 1; // Place the block
         }
     }
 }
@@ -131,15 +124,15 @@ void moveMachineBlock(char direction, int *blockMachineY) {
 void configureTerminal() {
     struct termios new_settings;
     tcgetattr(STDIN_FILENO, &new_settings);
-    new_settings.c_lflag &= ~ICANON; // Desactiva el modo canónico
-    new_settings.c_lflag &= ~ECHO;    // Desactiva el eco de la entrada
+    new_settings.c_lflag &= ~ICANON; // Disable canonical mode
+    new_settings.c_lflag &= ~ECHO;    // Disable echo
     tcsetattr(STDIN_FILENO, TCSANOW, &new_settings);
 }
 
 void resetTerminal() {
     struct termios new_settings;
     tcgetattr(STDIN_FILENO, &new_settings);
-    new_settings.c_lflag |= ICANON; // Activa el modo canónico
-    new_settings.c_lflag |= ECHO;    // Activa el eco de la entrada
+    new_settings.c_lflag |= ICANON; // Enable canonical mode
+    new_settings.c_lflag |= ECHO;    // Enable echo
     tcsetattr(STDIN_FILENO, TCSANOW, &new_settings);
 }

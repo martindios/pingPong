@@ -5,8 +5,8 @@
 
 void fillBoard();
 void drawBoard(int blockPlayerY);
-void movePlayerBlock(char direction, int *blockPlayerY);
-void moveMachineBlock(char direction, int *blockMachineY);
+void movePlayerBlock(char direction);
+void moveMachineBlock();
 void configureTerminal();
 void resetTerminal();
 void initBoard();

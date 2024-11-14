@@ -18,7 +18,6 @@
 static void signalHandler(int signal);
 
 //Global variables
-unsigned int board[SIZE][SIZE];
 pid_t father;
 FILE* tempfile;
 typedef struct {
@@ -85,6 +84,8 @@ int main (int argc, char **argv) {
     } else if (machine.pid == 0) {
         while(true);
     }
+
+    initBoard();
 
     //Father
     fwrite(&player, sizeof(Player), 1, tempfile);
