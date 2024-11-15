@@ -4,12 +4,14 @@
 #include <stdio.h>
 
 void fillBoard();
-void drawBoard(int blockPlayerY);
-void movePlayerBlock(char direction);
-void moveMachineBlock();
+void drawBoard();
+void movePlayerBlock(int pos);
+void moveMachineBlock(int pos);
 void configureTerminal();
 void resetTerminal();
 void initBoard();
+void moveBallToMachine(int pos);
+void moveBallToPlayer(int pos);
 
 
 #endif

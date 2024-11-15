@@ -92,14 +92,16 @@ int main (int argc, char **argv) {
     fwrite(&machine, sizeof(Player), 1, tempfile);
     rewind(tempfile);
     
-
+    drawBoard();
+    kill(player.pid, SIGUSR1);
+    /*
     if(rand()%2==0){
         printf("Machine turn\n");
         kill(machine.pid, SIGUSR1);
     } else {
         printf("Player turn\n");
         kill(player.pid, SIGUSR1);
-    }
+    } */
     while(true);
 
 
@@ -108,6 +110,7 @@ int main (int argc, char **argv) {
 }
 
 static void signalHandler(int signal) {
+    char charAux = '\0';
     pid_t pid = getpid(); 
     short int displ;
 
@@ -121,23 +124,27 @@ static void signalHandler(int signal) {
                 perror("Parent process shouldn't receive SIGUSR1\n");
                 exit(1);
             } else if(pid == player.pid){ //Player
-                do {
-                    printf("Select position [0-9]: ");
-                    scanf(" %hd", &player.pos);
-                    if(player.pos > 9 || player.pos < 0) printf("Invalid position\n");
-                } while(player.pos > 9 || player.pos < 0);
+                printf("Select position [0-9]: ");
+                charAux = getchar();
+                player.pos = charAux - '0';
 
                 printf("\n");
-                
+
+                movePlayerBlock(player.pos);
+                drawBoard();
+
                 printf("Player throws the ball from position %hd\n", player.pos);
 
-                do{
-                    printf("Select where you want to send the ball [0-9]: ");
-                    scanf(" %hd", &machine.ball);
-                    if(machine.ball > 9 || machine.ball < 0) printf("Invalid position\n");
-                } while(machine.ball > 9 || machine.ball < 0);
+
+                printf("Select where you want to send the ball [0-9]: ");
+                charAux = getchar();
+                machine.ball = charAux - '0';
 
                 printf("\n");
+
+                moveBallToMachine(machine.ball);
+                drawBoard();
+                //sleep(5);
 
                 printf("Player throws the ball to the position %hd\n", machine.ball);
 
@@ -150,6 +157,10 @@ static void signalHandler(int signal) {
             } else if(pid == machine.pid) {
                 machine.pos = rand() % 10;
                 player.ball = rand() % 10;
+
+                moveMachineBlock(machine.pos);
+                moveBallToPlayer(player.ball);
+                drawBoard();
 
                 printf("Machine throws the ball from position %hd\n", machine.pos);
                 #if D==1
@@ -217,15 +228,21 @@ static void signalHandler(int signal) {
                     kill(machine.pid, SIGUSR2);
                 }
             } else if(pid == machine.pid) {
+                /*
                 if(machine.pos == -1) { //initial position if not throw first
                     machine.pos = rand() % 10;
+                    moveMachineBlock(machine.pos);
                     printf("Machine set in position %hd", machine.pos);
-                }
+                } */
 
-                machine.pos += (rand() % 5) - 2; //{-2, ..., 2}
+                //machine.pos += (rand() % 5) - 2; //{-2, ..., 2}
+                machine.pos = 6; //DEBUG ONLY
                 if(machine.pos > 9) machine.pos = 9;
                 else if (machine.pos < 0) machine.pos = 0;
+                moveMachineBlock(machine.pos);
+                drawBoard();
                 printf("Machine displace to position %hd\n", machine.pos);
+                //sleep(3);
 
                 if(abs(machine.pos - machine.ball) > 3) { //Machine lose the point
                     printf("Machine couldn't return the ball\n");
@@ -239,9 +256,13 @@ static void signalHandler(int signal) {
                 } else { //Machine return the ball
                     printf("Machine return the ball\n");
                     player.ball = rand() % 10;
-                    #if D == 1
+
+                    moveBallToPlayer(player.ball);
+                    drawBoard();
+
+                    //#if D == 1
                     printf("Machine send the ball to position %hd\n", player.ball);
-                    #endif 
+                    //#endif 
 
                     fwrite(&player, sizeof(Player), 1, tempfile);
                     fwrite(&machine, sizeof(Player), 1, tempfile);
