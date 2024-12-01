@@ -7,18 +7,22 @@
 #define HEIGHT 20
 #define WIDTH 80
 
-unsigned int board[HEIGHT][WIDTH];
-int blockPlayerX = WIDTH / 2; // Initial position on the X-axis
-int blockPlayerY = HEIGHT - 2; // Position on the Y-axis
 
-int blockMachineX = WIDTH / 2;
-int blockMachineY = 1;
+void initGameState(GameStatus *state) {
+    state->blockPlayerX = WIDTH / 2;
+    state->blockPlayerY = HEIGHT - 2;
+    state->blockMachineX = WIDTH / 2;
+    state->blockMachineY = 1;
+    state->blockWidth = 8;
+    state->ballX = WIDTH / 2;
+    state->ballY = HEIGHT - 3;
 
-int blockWidth = 8; // Block width
-
-int ballX = WIDTH / 2;
-int ballY = HEIGHT - 3;
-
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            state->board[i][j] = 0;
+        }
+    }
+}
 
 void initBoard() {
     configureTerminal();
@@ -26,16 +30,16 @@ void initBoard() {
     fillBoard();
 
     /*
-    while (1) {
-        drawBoard();
-        char ch = getchar();
-        if (ch == 'q') { // Press 'q' to escape
-            system("clear");
-            break;
-        }
-        movePlayerBlock(ch);
-        moveMachineBlock();
-    } */
+     *   while (1) {
+     *       drawBoard();
+     *       char ch = getchar();
+     *       if (ch == 'q') { // Press 'q' to escape
+     *           system("clear");
+     *           break;
+}
+movePlayerBlock(ch);
+moveMachineBlock();
+} */
 
     //resetTerminal();
 }
@@ -43,7 +47,7 @@ void initBoard() {
 void fillBoard() {
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
-            board[i][j] = 0; 
+            board[i][j] = 0;
         }
     }
 }
@@ -53,17 +57,17 @@ void drawBoard() {
     // Draw the top border
     printf("#");
     for (int j = 0; j < WIDTH; j++) {
-        printf("#"); 
+        printf("#");
     }
     printf("#\n");
 
     for (int i = 0; i < HEIGHT; i++) {
         printf("#"); // Draw the left border
-        for (int j = 0; j < WIDTH; j++) { 
+        for (int j = 0; j < WIDTH; j++) {
             if (i == ballY && j == ballX) {
                 printf("o"); //Draw the ball
             } else if (i == blockPlayerY && j >= blockPlayerX && j < blockPlayerX + blockWidth) {
-                printf("O"); //Draw the player block 
+                printf("O"); //Draw the player block
             } else if(i == blockMachineY && j >= blockMachineX && j < blockMachineX + blockWidth) {
                 printf("O"); //Draw the machine block
             } else {
@@ -91,7 +95,7 @@ void movePlayerBlock(int pos) {
 
     int targetX = 8 * pos;
     int step = (targetX > blockPlayerX) ? 1 : -1; // Move to the right or left
-    
+
     while(blockPlayerX != targetX) {
         blockPlayerX += step;
 
@@ -141,8 +145,11 @@ void moveMachineBlock(int pos) {
                 board[blockMachineY][j] = 1; // Place the block
             }
         }
-
         drawBoard();
+        printf("BALL X: %d\n", ballX);
+        printf("BALL Y: %d\n", ballY);
+        sleep(2);
+
 
         usleep(50000);
     }
@@ -158,7 +165,7 @@ void moveMachineBlock(int pos) {
 
 void moveBallToMachine(int pos) { //Use Bresenham's line algorithm
     board[ballY][ballX] = 0; // Clear the ball
-    
+
     int targetY = 2;
     int targetX = 8 * pos;
 
@@ -172,7 +179,7 @@ void moveBallToMachine(int pos) { //Use Bresenham's line algorithm
 
     while (ballY != targetY || ballX != targetX) {
         board[ballY][ballX] = 0; // Clear the ball
-        
+
         if (err * 2 > -absDy) {
             err -= absDy;
             ballX += sx;

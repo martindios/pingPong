@@ -70,7 +70,7 @@ int main (int argc, char **argv) {
         exit(1);
     }
 
-    
+
     if((player.pid = fork()) == -1) {
         perror("Error creating player process\n");
         exit(1);
@@ -91,34 +91,34 @@ int main (int argc, char **argv) {
     fwrite(&player, sizeof(Player), 1, tempfile);
     fwrite(&machine, sizeof(Player), 1, tempfile);
     rewind(tempfile);
-    
+
     drawBoard();
     kill(player.pid, SIGUSR1);
     /*
-    if(rand()%2==0){
-        printf("Machine turn\n");
-        kill(machine.pid, SIGUSR1);
-    } else {
-        printf("Player turn\n");
-        kill(player.pid, SIGUSR1);
-    } */
+     *   if(rand()%2==0){
+     *       printf("Machine turn\n");
+     *       kill(machine.pid, SIGUSR1);
+} else {
+    printf("Player turn\n");
+    kill(player.pid, SIGUSR1);
+} */
     while(true);
 
 
-    //fclose(tempfile); 
+    //fclose(tempfile);
 
 }
 
 static void signalHandler(int signal) {
     char charAux = '\0';
-    pid_t pid = getpid(); 
+    pid_t pid = getpid();
     short int displ;
 
     fread(&player, sizeof(Player), 1, tempfile);
     fread(&machine, sizeof(Player), 1, tempfile);
     rewind(tempfile);
 
-    switch(signal){ 
+    switch(signal){
         case SIGUSR1: //Throw the ball
             if(pid == father){
                 perror("Parent process shouldn't receive SIGUSR1\n");
@@ -147,6 +147,7 @@ static void signalHandler(int signal) {
                 //sleep(5);
 
                 printf("Player throws the ball to the position %hd\n", machine.ball);
+                sleep(5);
 
                 fwrite(&player, sizeof(Player), 1, tempfile);
                 fwrite(&machine, sizeof(Player), 1, tempfile);
@@ -178,149 +179,147 @@ static void signalHandler(int signal) {
             }
 
             break;
-        case SIGUSR2: //Receive the ball
-            if(pid == father){ 
-                perror("Parent process shouldn't receive SIGUSR1\n");
-                exit(1);
-            } else if (pid == player.pid) {
-                if(player.pos == -1){
-                    do{
-                        printf("Select position: ");
-                        scanf(" %hd", &player.pos);
-                        if(player.pos > 9 || player.pos < 0) printf("Invalid pos\n");
-                    } while(player.pos > 9 || player.pos < 0);
+            case SIGUSR2: //Receive the ball
+                if(pid == father){
+                    perror("Parent process shouldn't receive SIGUSR1\n");
+                    exit(1);
+                } else if (pid == player.pid) {
+                    if(player.pos == -1){
+                        do{
+                            printf("Select position: ");
+                            scanf(" %hd", &player.pos);
+                            if(player.pos > 9 || player.pos < 0) printf("Invalid pos\n");
+                        } while(player.pos > 9 || player.pos < 0);
 
-                    printf("Player set in position %hd\n", player.pos);
-                }
+                            printf("Player set in position %hd\n", player.pos);
+                    }
 
-                do {
-                    printf("Select displacement: [-2 2 desde %hd]", player.pos);
-                    scanf(" %hd", &displ);
-                    if(player.pos + displ > 9 || player.pos + displ < 0 || displ < -2 || displ > 2) printf("Invalid displacement\n");
-                } while(player.pos + displ > 9 || player.pos + displ < 0 || displ < -2 || displ > 2);
-                printf("\n");
-                player.pos += displ;
+                    do {
+                        printf("Select displacement: [-2 2 desde %hd]", player.pos);
+                        scanf(" %hd", &displ);
+                        if(player.pos + displ > 9 || player.pos + displ < 0 || displ < -2 || displ > 2) printf("Invalid displacement\n");
+                    } while(player.pos + displ > 9 || player.pos + displ < 0 || displ < -2 || displ > 2);
+                        printf("\n");
+                        player.pos += displ;
 
-                printf("Player displace to position %hd\n", player.pos);
+                        printf("Player displace to position %hd\n", player.pos);
 
-                if(abs(player.pos - player.ball) > 3) { //Player lose the point
-                    printf("Player couldn't return the ball\n");
-                    machine.winner = true;
-                    fwrite(&player, sizeof(Player), 1, tempfile);
-                    fwrite(&machine, sizeof(Player), 1, tempfile);
-                    rewind(tempfile);
-                    //sleep(1);
-                    kill(father, SIGHUP);
-                } else { //Player return the ball
-                    printf("Player return the ball");
-                    do{
-                        printf("Select where to send the ball: ");
-                        scanf(" %hd", &machine.ball);
-                    } while(machine.ball > 9 || machine.ball < 0);
-                    printf("\n");
+                        if(abs(player.pos - player.ball) > 3) { //Player lose the point
+                            printf("Player couldn't return the ball\n");
+                            machine.winner = true;
+                            fwrite(&player, sizeof(Player), 1, tempfile);
+                            fwrite(&machine, sizeof(Player), 1, tempfile);
+                            rewind(tempfile);
+                            //sleep(1);
+                            kill(father, SIGHUP);
+                        } else { //Player return the ball
+                            printf("Player return the ball");
+                            do{
+                                printf("Select where to send the ball: ");
+                                scanf(" %hd", &machine.ball);
+                            } while(machine.ball > 9 || machine.ball < 0);
+                            printf("\n");
 
-                    printf("Player send the ball to position %hd", machine.ball);
+                            printf("Player send the ball to position %hd", machine.ball);
 
-                    fwrite(&player, sizeof(Player), 1, tempfile);
-                    fwrite(&machine, sizeof(Player), 1, tempfile);
-                    rewind(tempfile);
+                            fwrite(&player, sizeof(Player), 1, tempfile);
+                            fwrite(&machine, sizeof(Player), 1, tempfile);
+                            rewind(tempfile);
 
-                    kill(machine.pid, SIGUSR2);
-                }
-            } else if(pid == machine.pid) {
-                /*
-                if(machine.pos == -1) { //initial position if not throw first
-                    machine.pos = rand() % 10;
-                    moveMachineBlock(machine.pos);
-                    printf("Machine set in position %hd", machine.pos);
+                            kill(machine.pid, SIGUSR2);
+                        }
+                } else if(pid == machine.pid) {
+                    /*
+                     *               if(machine.pos == -1) { //initial position if not throw first
+                     *                   machine.pos = rand() % 10;
+                     *                   moveMachineBlock(machine.pos);
+                     *                   printf("Machine set in position %hd", machine.pos);
                 } */
 
-                //machine.pos += (rand() % 5) - 2; //{-2, ..., 2}
-                machine.pos = 6; //DEBUG ONLY
-                if(machine.pos > 9) machine.pos = 9;
-                else if (machine.pos < 0) machine.pos = 0;
-                moveMachineBlock(machine.pos);
-                drawBoard();
-                printf("Machine displace to position %hd\n", machine.pos);
-                //sleep(3);
+                    //machine.pos += (rand() % 5) - 2; //{-2, ..., 2}
+                    machine.pos = 6; //DEBUG ONLY
+                    if(machine.pos > 9) machine.pos = 9;
+                    else if (machine.pos < 0) machine.pos = 0;
+                    moveMachineBlock(machine.pos);
+                    printf("Machine displace to position %hd\n", machine.pos);
+                    sleep(5);
 
-                if(abs(machine.pos - machine.ball) > 3) { //Machine lose the point
-                    printf("Machine couldn't return the ball\n");
-                    player.winner = true;
-                    fwrite(&player, sizeof(Player), 1, tempfile);
-                    fwrite(&machine, sizeof(Player), 1, tempfile);
-                    rewind(tempfile);
+                    if(abs(machine.pos - machine.ball) > 3) { //Machine lose the point
+                        printf("Machine couldn't return the ball\n");
+                        player.winner = true;
+                        fwrite(&player, sizeof(Player), 1, tempfile);
+                        fwrite(&machine, sizeof(Player), 1, tempfile);
+                        rewind(tempfile);
 
-                    kill(father, SIGHUP);
-                    
-                } else { //Machine return the ball
-                    printf("Machine return the ball\n");
-                    player.ball = rand() % 10;
+                        kill(father, SIGHUP);
 
-                    moveBallToPlayer(player.ball);
-                    drawBoard();
+                    } else { //Machine return the ball
+                        printf("Machine return the ball\n");
+                        player.ball = rand() % 10;
 
-                    //#if D == 1
-                    printf("Machine send the ball to position %hd\n", player.ball);
-                    //#endif 
+                        moveBallToPlayer(player.ball);
+                        drawBoard();
 
-                    fwrite(&player, sizeof(Player), 1, tempfile);
-                    fwrite(&machine, sizeof(Player), 1, tempfile);
-                    rewind(tempfile);
+                        //#if D == 1
+                        printf("Machine send the ball to position %hd\n", player.ball);
+                        sleep(5);
+                        //#endif
 
-                    kill(player.pid, SIGUSR2);
-                }
-            }
+                        fwrite(&player, sizeof(Player), 1, tempfile);
+                        fwrite(&machine, sizeof(Player), 1, tempfile);
+                        rewind(tempfile);
 
-            break;
-
-        case SIGHUP: //End (round/match)
-            if(pid == father) {
-                if(player.winner && !machine.winner) {
-                    printf("Point to Player\n");
-                    player.points++;
-                } else if(!player.winner && machine.winner) {
-                    printf("Point to Machine\n");
-                    machine.points++;
-                }
-
-                if(player.points < 10 && machine.points < 10) { //End of round
-                    printf("Player points: %hd\n", player.points);
-                    printf("Machine points: %hd\n", machine.points);
-
-                    player.winner = false;
-                    machine.winner = false;
-
-                    fwrite(&player, sizeof(Player), 1, tempfile);
-                    fwrite(&machine, sizeof(Player), 1, tempfile);
-                    rewind(tempfile);
-
-                    if(rand() % 2 == 0) {
-                        printf("Turn to Machine\n");
-                        kill(machine.pid, SIGUSR1);
-                    } else {
-                        printf("Turn to Player\n");
-                        kill(player.pid, SIGUSR1);
+                        kill(player.pid, SIGUSR2);
                     }
-                } else { //End of match
-                    if(player.points >= 10) printf("Player wins\n");
-                    else if (machine.points >= 10) printf("Machine wins\n");
-                    
-                    kill(player.pid, SIGHUP);
-                    waitpid(player.pid, &ret, 0);
-                    printf("Player process finished\n");
-                    kill(machine.pid, SIGHUP);
-                    waitpid(machine.pid, &ret, 0);
-                    printf("Machine process finished\n");
-                    exit(0);
                 }
-            } else if(pid == player.pid) {
-                exit(0);
-            } else if(pid == machine.pid) {
-                exit(0);
-            }
-            break;
+
+                break;
+
+                case SIGHUP: //End (round/match)
+                    if(pid == father) {
+                        if(player.winner && !machine.winner) {
+                            printf("Point to Player\n");
+                            player.points++;
+                        } else if(!player.winner && machine.winner) {
+                            printf("Point to Machine\n");
+                            machine.points++;
+                        }
+
+                        if(player.points < 10 && machine.points < 10) { //End of round
+                            printf("Player points: %hd\n", player.points);
+                            printf("Machine points: %hd\n", machine.points);
+
+                            player.winner = false;
+                            machine.winner = false;
+
+                            fwrite(&player, sizeof(Player), 1, tempfile);
+                            fwrite(&machine, sizeof(Player), 1, tempfile);
+                            rewind(tempfile);
+
+                            if(rand() % 2 == 0) {
+                                printf("Turn to Machine\n");
+                                kill(machine.pid, SIGUSR1);
+                            } else {
+                                printf("Turn to Player\n");
+                                kill(player.pid, SIGUSR1);
+                            }
+                        } else { //End of match
+                            if(player.points >= 10) printf("Player wins\n");
+                            else if (machine.points >= 10) printf("Machine wins\n");
+
+                            kill(player.pid, SIGHUP);
+                            waitpid(player.pid, &ret, 0);
+                            printf("Player process finished\n");
+                            kill(machine.pid, SIGHUP);
+                            waitpid(machine.pid, &ret, 0);
+                            printf("Machine process finished\n");
+                            exit(0);
+                        }
+                    } else if(pid == player.pid) {
+                        exit(0);
+                    } else if(pid == machine.pid) {
+                        exit(0);
+                    }
+                    break;
     }
 }
-
-
